@@ -2,17 +2,10 @@
   "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "rgName": {
+    "ResourceGroupName": {
       "type": "string",
       "metadata": {
         "description": "Name of the resourceGroup to create"
-      }
-    },
-    "rgLocation": {
-      "type": "string",
-      "defaultValue": "[deployment().location]",
-      "metadata": {
-        "description": "Location for the resourceGroup"
       }
     }
   },
@@ -20,10 +13,10 @@
     {
       "type": "Microsoft.Resources/resourceGroups",
       "apiVersion": "2020-06-01",
-      "name": "[parameters('rgName')]",
-      "location": "[parameters('rgLocation')]",
+      "name": "[parameters('ResourceGroupName')]",
+      "location": "[deployment().location]",
       "tags": {
-        "Note": "subscription level deployment"
+        "Note": "PlannerReporting"
       },
       "properties": {}
     }
