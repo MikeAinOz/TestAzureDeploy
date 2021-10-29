@@ -1,6 +1,10 @@
 {
   "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
+  "metadata": {
+    "itemDisplayName": "Add Resource Group",
+    "description": "Adds a resource group to the specified Subscription and Location "
+  },
   "parameters": {
     "ResourceGroupName": {
       "type": "string",
