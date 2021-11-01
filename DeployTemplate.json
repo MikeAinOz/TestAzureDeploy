@@ -1,0 +1,103 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "workflows_UpdatePlannerTask_name": {
+            "defaultValue": "UpdatePlannerTask",
+            "type": "String"
+        },
+        "connections_planner_externalid": {
+            "defaultValue": "/subscriptions/962ed527-10d6-4b4e-a019-e92e85d06de9/resourceGroups/Testing/providers/Microsoft.Web/connections/planner",
+            "type": "String"
+        },
+        "connections_sql_1_externalid": {
+            "defaultValue": "/subscriptions/962ed527-10d6-4b4e-a019-e92e85d06de9/resourceGroups/Testing/providers/Microsoft.Web/connections/sql-1",
+            "type": "String"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.Logic/workflows",
+            "apiVersion": "2017-07-01",
+            "name": "[parameters('workflows_UpdatePlannerTask_name')]",
+            "location": "australiaeast",
+            "properties": {
+                "state": "Enabled",
+                "definition": {
+                    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "$connections": {
+                            "defaultValue": {},
+                            "type": "Object"
+                        }
+                    },
+                    "triggers": {
+                        "When_an_item_is_modified_(V2)": {
+                            "recurrence": {
+                                "frequency": "Minute",
+                                "interval": 3
+                            },
+                            "evaluatedRecurrence": {
+                                "frequency": "Minute",
+                                "interval": 3
+                            },
+                            "splitOn": "@triggerBody()?['value']",
+                            "type": "ApiConnection",
+                            "inputs": {
+                                "host": {
+                                    "connection": {
+                                        "name": "@parameters('$connections')['sql_1']['connectionId']"
+                                    }
+                                },
+                                "method": "get",
+                                "path": "/datasets/@{encodeURIComponent(encodeURIComponent('default'))},@{encodeURIComponent(encodeURIComponent('default'))}/tables/@{encodeURIComponent(encodeURIComponent('[dbo].[Task]'))}/onupdateditems"
+                            }
+                        }
+                    },
+                    "actions": {
+                        "Update_a_task": {
+                            "runAfter": {},
+                            "type": "ApiConnection",
+                            "inputs": {
+                                "body": {
+                                    "dueDateTime": "@triggerBody()?['dueDate']",
+                                    "startDateTime": "@triggerBody()?['startDate']",
+                                    "title": "@triggerBody()?['taskName']"
+                                },
+                                "headers": {
+                                    "prefer": " return=representation"
+                                },
+                                "host": {
+                                    "connection": {
+                                        "name": "@parameters('$connections')['planner']['connectionId']"
+                                    }
+                                },
+                                "method": "patch",
+                                "path": "/v1.0/planner/tasks/@{encodeURIComponent(triggerBody()?['taskId'])}"
+                            }
+                        }
+                    },
+                    "outputs": {}
+                },
+                "parameters": {
+                    "$connections": {
+                        "value": {
+                            "planner": {
+                                "connectionId": "[parameters('connections_planner_externalid')]",
+                                "connectionName": "planner",
+                                "id": "/subscriptions/962ed527-10d6-4b4e-a019-e92e85d06de9/providers/Microsoft.Web/locations/australiaeast/managedApis/planner"
+                            },
+                            "sql_1": {
+                                "connectionId": "[parameters('connections_sql_1_externalid')]",
+                                "connectionName": "sql-1",
+                                "id": "/subscriptions/962ed527-10d6-4b4e-a019-e92e85d06de9/providers/Microsoft.Web/locations/australiaeast/managedApis/sql"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    ]
+}
